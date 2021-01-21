@@ -39,7 +39,7 @@ fn save_average(avg : f32) {
     };
 
     let now = get_date_string();
-    file.write_fmt(format_args!("{} {}", now, avg));
+    file.write_fmt(format_args!("{} {}\n", now, avg));
 }
 
 fn get_date_string() -> String {
@@ -104,10 +104,15 @@ fn scrap_today_data() -> Result<(), reqwest::Error>{
 
     let mut owned_string : String = "data".to_owned();
     let date_string : &str = &get_date_string();
+    let date_string = date_string
+        .replace("+", "")
+        .replace(":", "")
+        .replace(".", "");
     let final_string : &str = ".txt";
-    owned_string.push_str(date_string);
+    owned_string.push_str(date_string.as_str());
     owned_string.push_str(final_string);
     let path = Path::new(owned_string.as_str());
+    println!("{}", owned_string.as_str());
 
     let mut file = match std::fs::File::create(&path) {
         Err(why) => panic!("Couldn't create:{}", why),
