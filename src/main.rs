@@ -10,8 +10,10 @@ use std::path::Path;
 use std::io::Write;
 
 
+static regex_string: &str = r"\d+((x)|(er)|(St)|( )(Stück|Stk|STK))";
+
 fn regex_test() {
-    let re = Regex::new(r"\d+((x)|(er)|(St)|( )(Stück|Stk))").unwrap();
+    let re = Regex::new(regex_string).unwrap();
     assert!(re.is_match("50x"));
     assert!(re.is_match("5x"));
     assert!(re.is_match("50 Stück"));
@@ -81,7 +83,7 @@ fn scrap_today_data() -> Result<(), reqwest::Error>{
         let price  = price.split_whitespace().next().unwrap();
         let price_float : f32 = price.replace(",", ".").parse().unwrap();
 
-        let re = Regex::new(r"\d+((x)|(er)|(St)|( )(Stück|Stk|STK))").unwrap();
+        let re = Regex::new(regex_string).unwrap();
         println!("{}", headline);
         let text  = re.find(headline);
         if text == None {
@@ -227,7 +229,6 @@ fn main() -> Result<(), reqwest::Error> {
     let args : Vec<String> = env::args().collect();
     if args.len() != 2 {
         scrap_today_data();
-        display_data();
     }
     let main_arg  = &args[1];
     if main_arg == "-h" || main_arg == "--help" {
