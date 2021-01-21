@@ -28,14 +28,24 @@ fn regex_test() {
 
 fn save_average(avg : f32) {
     let path = Path::new("avg.txt");
-    let mut file = match std::fs::File::create(&path) {
+    let file = std::fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .append(true)
+        .open(&path);
+    let mut file = match file {
         Err(why) => panic!("Couldn't create:{}", why),
         Ok(file) => file,
     };
 
+    let now = get_date_string();
+    file.write_fmt(format_args!("{} {}", now, avg));
+}
+
+fn get_date_string() -> String {
     let now = chrono::Utc::now();
     let now = now.to_rfc3339();
-    file.write_fmt(format_args!("{} {}", now, avg));
+    return now;
 }
 
 fn scrap_today_data() -> Result<(), reqwest::Error>{
@@ -92,7 +102,13 @@ fn scrap_today_data() -> Result<(), reqwest::Error>{
     }
     println!("Average: {}", collected_price / item);
 
-    let path = Path::new("data.txt");
+    let mut owned_string : String = "data".to_owned();
+    let date_string : &str = &get_date_string();
+    let final_string : &str = ".txt";
+    owned_string.push_str(date_string);
+    owned_string.push_str(final_string);
+    let path = Path::new(owned_string.as_str());
+
     let mut file = match std::fs::File::create(&path) {
         Err(why) => panic!("Couldn't create:{}", why),
         Ok(file) => file,
@@ -199,7 +215,7 @@ fn display_data() -> Result<(), std::io::Error> {
 }
 
 fn main() -> Result<(), reqwest::Error> {
-    //scrap_today_data();
+    //todo: interpret argument for file names
 
     let args : Vec<String> = env::args().collect();
     if args.len() != 2 {
