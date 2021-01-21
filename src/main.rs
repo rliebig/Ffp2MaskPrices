@@ -7,7 +7,7 @@ use tui::style::{Style, Color};
 use tui::widgets::{BarChart, Block};
 use tui::backend::CrosstermBackend;
 use std::path::Path;
-use std::io::Write;
+use std::io::{Write, Error};
 
 
 static REGEX_STRING: &str = r"\d+((x)|(er)|(St)|( )(Stück|Stk|STK))";
@@ -42,7 +42,11 @@ fn save_average(avg : f32) {
     };
 
     let now = get_date_string();
-    file.write_fmt(format_args!("{} {}\n", now, avg));
+    let result = file.write_fmt(format_args!("{} {}\n", now, avg));
+    match result {
+        Ok(_) => {}
+        Err(why) => {panic!("Could not write to file: {}", why);}
+    }
 }
 
 fn get_date_string() -> String {
