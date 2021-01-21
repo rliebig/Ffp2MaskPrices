@@ -4,7 +4,7 @@ use std::env;
 use tui::Terminal;
 use tui::layout::{Direction, Layout, Constraint};
 use tui::style::{Style, Color};
-use tui::widgets::{Borders, BarChart, Block};
+use tui::widgets::{BarChart, Block};
 use tui::backend::CrosstermBackend;
 use std::path::Path;
 use std::io::Write;
@@ -12,6 +12,7 @@ use std::io::Write;
 
 static regex_string: &str = r"\d+((x)|(er)|(St)|( )(Stück|Stk|STK))";
 
+#[cfg(test)]
 fn regex_test() {
     let re = Regex::new(regex_string).unwrap();
     assert!(re.is_match("50x"));
