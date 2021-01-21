@@ -62,7 +62,7 @@ fn get_date_string() -> String {
 }
 
 fn scrap_today_data() -> Result<(), reqwest::Error>{
-    let url = "https://www.amazon.de/s?k=ffp1+maske&__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&ref=nb_sb_noss_1";
+    let url = "https://www.amazon.de/s?k=ffp2+masken&__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&ref=nb_sb_noss_1";
     println!("Downloading document");
     let req = reqwest::blocking::get(url)?
         .text()?;
@@ -219,7 +219,7 @@ fn display_data() -> Result<(), std::io::Error> {
 
                 let barchart = BarChart::default()
                     .block(Block::default()
-                        .title("Preise in Cent."))
+                    .title("Preise in Cent."))
                     .data(&app.data)
                     .bar_width(9)
                     .bar_style(Style::default().fg(Color::Yellow))
