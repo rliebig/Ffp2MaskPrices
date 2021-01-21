@@ -75,6 +75,9 @@ fn scrap_today_data() -> Result<(), reqwest::Error>{
     for (headline, price) in headings
         .iter_mut()
         .zip(prices.iter_mut()) {
+        if !headline.contains("FFP2") {
+            continue;
+        }
         let price  = price.split_whitespace().next().unwrap();
         let price_float : f32 = price.replace(",", ".").parse().unwrap();
 
@@ -97,6 +100,7 @@ fn scrap_today_data() -> Result<(), reqwest::Error>{
 
         println!("{:?}: {}", price, headline);
         conv_prives.push(price_float / (converted_number as f32));
+        println!("calculated per piece value: {}", price_float / (converted_number as f32));
         collected_price += price_float / (converted_number as f32);
         item = item + 1.0;
     }
