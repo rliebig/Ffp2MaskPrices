@@ -9,7 +9,7 @@ It utilizes tui-rs for graphics, reqwest for HTTP and select-rs for parsing.
 Still a work in progress, will probably update this in the near future.
 
 ## Setup
-``
+``shell
 $ mkdir Ffp2MaskPrices
 $ cd Ffp2MaskPrices
 $ git init
