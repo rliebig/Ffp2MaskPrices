@@ -7,3 +7,13 @@ This is a crude, smol tool written in rust to monitor Amazon prices for FFP" mas
 It utilizes tui-rs for graphics, reqwest for HTTP and select-rs for parsing.
 
 Still a work in progress, will probably update this in the near future.
+
+## Setup
+``
+$ mkdir Ffp2MaskPrices
+$ cd Ffp2MaskPrices
+$ git init
+$ git pull https://github.com/rliebig/Ffp2MaskPrices
+$ cargo build --release``
+
+``
