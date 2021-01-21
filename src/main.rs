@@ -13,21 +13,27 @@ use std::io::{Write, Error};
 static REGEX_STRING: &str = r"\d+((x)|(er)|(St)|( )(Stück|Stk|STK))";
 
 #[cfg(test)]
-fn regex_test() {
-    let re = Regex::new(REGEX_STRING).unwrap();
-    assert!(re.is_match("50x"));
-    assert!(re.is_match("5x"));
-    assert!(re.is_match("50 Stück"));
-    assert!(re.is_match("5 Stk"));
-    assert!(re.is_match("10er"));
-    assert!(re.is_match("50St"));
-    assert!(re.is_match("(20er)"));
+mod tests {
+    use super::*;
 
-    assert!(!re.is_match("5 lagig"));
-    assert!(!re.is_match("EN149:2001+A1:2009"));
-    assert!(!re.is_match("FFP2 "));
-    assert!(!re.is_match("Einweg-3-Lagen-Schutzmaske"));
+    #[test]
+    fn regex_test() {
+        let re = Regex::new(REGEX_STRING).unwrap();
+        assert!(re.is_match("50x"));
+        assert!(re.is_match("5x"));
+        assert!(re.is_match("50 Stück"));
+        assert!(re.is_match("5 Stk"));
+        assert!(re.is_match("10er"));
+        assert!(re.is_match("50St"));
+        assert!(re.is_match("(20er)"));
+
+        assert!(!re.is_match("5 lagig"));
+        assert!(!re.is_match("EN149:2001+A1:2009"));
+        assert!(!re.is_match("FFP2 "));
+        assert!(!re.is_match("Einweg-3-Lagen-Schutzmaske"));
+    }
 }
+
 
 fn save_average(avg : f32) {
     let path = Path::new("avg.txt");
@@ -56,8 +62,6 @@ fn get_date_string() -> String {
 }
 
 fn scrap_today_data() -> Result<(), reqwest::Error>{
-
-    regex_test();
     let url = "https://www.amazon.de/s?k=ffp1+maske&__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&ref=nb_sb_noss_1";
     println!("Downloading document");
     let req = reqwest::blocking::get(url)?
