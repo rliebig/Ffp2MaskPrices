@@ -75,8 +75,8 @@ fn scrap_today_data() -> Result<(), reqwest::Error>{
     for (headline, price) in headings
         .iter_mut()
         .zip(prices.iter_mut()) {
-        let price  = price.split_whitespace().next();
-        let price_float : f32 = price.unwrap().replace(",", ".").parse().unwrap();
+        let price  = price.split_whitespace().next().unwrap();
+        let price_float : f32 = price.replace(",", ".").parse().unwrap();
 
         let re = Regex::new(r"\d+((x)|(er)|(St)|( )(Stück|Stk|STK))").unwrap();
         println!("{}", headline);
@@ -124,8 +124,6 @@ fn scrap_today_data() -> Result<(), reqwest::Error>{
     }
     save_average(collected_price / item);
 
-
-    display_data_chart(conv_prives);
     Ok(())
 }
 
