@@ -238,14 +238,17 @@ fn main() -> Result<(), reqwest::Error> {
     let args : Vec<String> = env::args().collect();
     if args.len() != 2 {
         scrap_today_data();
-    }
-    let main_arg  = &args[1];
-    if main_arg == "-h" || main_arg == "--help" {
-        display_help();
-    } else if main_arg == "--scrap" {
-        scrap_today_data();
-    } else if main_arg == "--display" {
-        display_data();
+    } else {
+        let main_arg  = &args[1];
+        if main_arg == "-h" || main_arg == "--help" {
+            display_help();
+        } else if main_arg == "--scrap" {
+            scrap_today_data();
+        } else if main_arg == "--display" {
+            display_data();
+        } else if main_arg == "--recalculate-avg" {
+
+        }
     }
 
     Ok(())
