@@ -1,5 +1,3 @@
-import os
-print(os.getcwd())
 readfile = open("avg.txt", "r")
 newfile = open("hourly.txt", "w")
 
