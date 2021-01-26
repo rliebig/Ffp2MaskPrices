@@ -8,7 +8,9 @@ use tui::widgets::{BarChart, Block};
 use tui::backend::CrosstermBackend;
 use std::path::Path;
 use std::io::{Write, Error};
+use std::fs::OpenOptions;
 
+use clap::{Arg, App, SubCommand};
 
 static REGEX_STRING: &str = r"\d+((x)|(er)|(St)|( )(Stück|Stk|STK))";
 
@@ -37,7 +39,7 @@ mod tests {
 
 fn save_average(avg : f32) {
     let path = Path::new("avg.txt");
-    let file = std::fs::OpenOptions::new()
+    let file = OpenOptions::new()
         .write(true)
         .create(true)
         .append(true)
@@ -142,113 +144,89 @@ fn scrap_today_data() -> Result<(), reqwest::Error>{
     Ok(())
 }
 
-fn display_help() {
-    println!("ffp2_mask_prices takes these arguments:");
-    println!("--scrap : Downloads current market data");
-    println!("--display : ")
-}
+fn recalculate_avg() {
+    let current_dir = std::env::current_dir();
+    let current_dir = match current_dir {
+        Ok(PathBuf) => PathBuf,
+        Err(why) => panic!("not possible to traverse directory: {}", why),
+    };
 
-struct App<'a> {
-    data: Vec<(&'a str, u64)>,
-}
+    let iterator = std::fs::read_dir(current_dir);
+    let iterator = match iterator {
+        Ok(iterator) => iterator,
+        Err(why) => panic!("not possible to traverse directory: {}", why),
+    };
 
-impl<'a>App<'a> {
-    fn new() -> App<'a> {
-        App {
-            data: vec![
-            ]
+    let avg : Vec<(&str, f32)> = vec![];
+    for entry in iterator {
+        let entry = entry;
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(why) => panic!("not possible to traverse directory: {}", why),
+        };
+        let path = entry.path();
+        println!("{}", path.as_path().display());
+        let filename = path.as_path().file_name();
+        let filename = match filename {
+            Some(filename) => filename,
+            None => panic!("not possible to traverse directory"),
+        };
+
+        let name = filename.to_str();
+        let name = match name {
+            Some(name) => name,
+            None => panic!("not possible to traverse directory"),
+        };
+        println!("{}", name);
+
+        if name.starts_with("data") && name.ends_with(".txt") {
+            println!("work on it.");
+        } else {
+            println!("nope.");
         }
+
+        let actual_path = path.as_path();
+        let actual_file = OpenOptions::new()
+            .read(true)
+            .open(&actual_path);
+
+
+
     }
 
-    fn update(&mut self, number : u64) {
-        self.data.push(("test", number));
-    }
-}
+    let avg_path = Path::new("avg.txt");
+    let avg_file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .append(false)
+        .open(&avg_path);
 
-fn display_data_chart(conv_data : Vec<f32>) -> Result<(), std::io::Error> {
-    let stdout = std::io::stdout();
-    let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
-
-    let mut app = App::new();
-    for data in conv_data {
-          app.update((data * 100.0).round() as u64);
-    }
-
-    terminal.clear();
-    loop {
-        terminal.draw(
-            |f| {
-                let chunks = Layout::default()
-                    .direction(Direction::Vertical)
-                    .margin(2)
-                    .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
-                    .split(f.size())
-                    ;
-
-                let barchart = BarChart::default()
-                    .block(Block::default()
-                    .title("Preise in Cent."))
-                    .data(&app.data)
-                    .bar_width(9)
-                    .bar_style(Style::default().fg(Color::Yellow))
-                    .value_style(Style::default().fg(Color::Black).bg(Color::Yellow));
-                f.render_widget(barchart, chunks[0]);
-            }
-        );
-    }
-
-    Ok(())
-}
-
-fn display_data() -> Result<(), std::io::Error> {
-    let stdout = std::io::stdout();
-    let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
-
-    let app = App::new();
-    loop {
-        terminal.draw(
-            |f| {
-                let chunks = Layout::default()
-                    .direction(Direction::Vertical)
-                    .margin(2)
-                    .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
-                    .split(f.size())
-                    ;
-
-                let barchart = BarChart::default()
-                    .block(Block::default()
-                    .title("Preise in Cent."))
-                    .data(&app.data)
-                    .bar_width(9)
-                    .bar_style(Style::default().fg(Color::Yellow))
-                    .value_style(Style::default().fg(Color::Black).bg(Color::Yellow));
-                f.render_widget(barchart, chunks[0]);
-            }
-        );
-    }
-
-    Ok(())
+    let mut file = match avg_file {
+        Err(why) => panic!("Couldn't modify: {}", why),
+        Ok(file) => file
+    };
 }
 
 fn main() -> Result<(), reqwest::Error> {
     //todo: interpret argument for file names
+    let matches = App::new("Ffp2MaskPrices")
+        .version("0.1")
+        .author("Richard Liebig <liebig.richard >AT< hotmail.com>")
+        .about("Scraps amazon prices for FFF masks in german language")
+        .subcommand(SubCommand::with_name("new")
+            .about("scrap current prices"))
+        .subcommand(SubCommand::with_name("recalulate-avg")
+            .about("recalculate averages"))
+        .subcommand(SubCommand::with_name("serve")
+            .about("produces png plots for all data and serves them via a webserver"))
+        .get_matches();
 
-    let args : Vec<String> = env::args().collect();
-    if args.len() != 2 {
+    if let Some(matches) = matches.subcommand_matches("scrap") {
         scrap_today_data();
-    } else {
-        let main_arg  = &args[1];
-        if main_arg == "-h" || main_arg == "--help" {
-            display_help();
-        } else if main_arg == "--scrap" {
-            scrap_today_data();
-        } else if main_arg == "--display" {
-            display_data();
-        } else if main_arg == "--recalculate-avg" {
+    }
 
-        }
+    if let Some(matches) = matches.subcommand_matches("recalculate-avg") {
+       recalculate_avg();
     }
 
     Ok(())

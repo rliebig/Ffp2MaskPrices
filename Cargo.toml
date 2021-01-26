@@ -13,3 +13,4 @@ tui = { version = "0.14", default-features = false, features = ['crossterm'] }
 regex = "1.4.3"
 select = "0.5.0"
 chrono = "0.4.19"
+clap = "2.33.3"
