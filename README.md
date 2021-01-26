@@ -11,17 +11,14 @@ Still a work in progress, will probably update this in the near future.
 ## Setup
 Starting in your home directory
 
-    $ mkdir Ffp2MaskPrices
-    $ cd Ffp2MaskPrices
-    $ git init
-    $ git pull https://github.com/rliebig/Ffp2MaskPrices
+    $ git clone https://github.com/rliebig/Ffp2MaskPrices
     $ cargo build --release 
     $ crontab -e
 
 Now add the following to your cronfile for hourly data scrapping:
 
 
-    0 * * * * * ~/Ffp2MaskPrices/target/release/Ffp2MaskPrices
+    0 * * * * ~/Ffp2MaskPrices/target/release/Ffp2MaskPrices
 
 ## Todos
 [ ] tui-rs rendering should work
