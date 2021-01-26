@@ -1,11 +1,8 @@
 use select::predicate::Class;
+
 use regex::Regex;
+
 use std::env;
-use tui::Terminal;
-use tui::layout::{Direction, Layout, Constraint};
-use tui::style::{Style, Color};
-use tui::widgets::{BarChart, Block};
-use tui::backend::CrosstermBackend;
 use std::path::Path;
 use std::io::{Write, Error};
 use std::fs::OpenOptions;
@@ -63,7 +60,7 @@ fn get_date_string() -> String {
     return now;
 }
 
-fn scrap_today_data() -> Result<(), reqwest::Error>{
+fn scrap_today_data(path_arg : & str) -> Result<(), reqwest::Error>{
     let url = "https://www.amazon.de/s?k=ffp2+masken&__mk_de_DE=%C3%85M%C3%85%C5%BD%C3%95%C3%91&ref=nb_sb_noss_1";
     println!("Downloading document");
     let req = reqwest::blocking::get(url)?
@@ -119,13 +116,15 @@ fn scrap_today_data() -> Result<(), reqwest::Error>{
     }
     println!("Average: {}", collected_price / item);
 
-    let mut owned_string : String = "data".to_owned();
+    let mut owned_string : String = "".to_owned();
     let date_string : &str = &get_date_string();
     let date_string = date_string
         .replace("+", "")
         .replace(":", "")
         .replace(".", "");
     let final_string : &str = ".txt";
+    owned_string.push_str(path_arg);
+    owned_string.push_str("data");
     owned_string.push_str(date_string.as_str());
     owned_string.push_str(final_string);
     let path = Path::new(owned_string.as_str());
@@ -213,7 +212,12 @@ fn main() -> Result<(), reqwest::Error> {
         .version("0.1")
         .author("Richard Liebig <liebig.richard >AT< hotmail.com>")
         .about("Scraps amazon prices for FFF masks in german language")
-        .subcommand(SubCommand::with_name("new")
+        .arg(Arg::with_name("path")
+            .short("p")
+            .long("path")
+            .help("Set directoy for data saving")
+            .default_value(""))
+        .subcommand(SubCommand::with_name("scrap")
             .about("scrap current prices"))
         .subcommand(SubCommand::with_name("recalulate-avg")
             .about("recalculate averages"))
@@ -221,8 +225,10 @@ fn main() -> Result<(), reqwest::Error> {
             .about("produces png plots for all data and serves them via a webserver"))
         .get_matches();
 
+    let path = matches.value_of("path").unwrap_or("");
+    println!("{}", path);
     if let Some(matches) = matches.subcommand_matches("scrap") {
-        scrap_today_data();
+        scrap_today_data(path);
     }
 
     if let Some(matches) = matches.subcommand_matches("recalculate-avg") {
