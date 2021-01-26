@@ -4,7 +4,7 @@ use regex::Regex;
 
 use std::env;
 use std::path::Path;
-use std::io::{Write, Error};
+use std::io::{Write, Error, BufRead};
 use std::fs::OpenOptions;
 
 use clap::{Arg, App, SubCommand};
@@ -180,18 +180,36 @@ fn recalculate_avg() {
 
         if name.starts_with("data") && name.ends_with(".txt") {
             println!("work on it.");
-        } else {
-            println!("nope.");
+            let actual_path = path.as_path();
+
+            let actual_file = OpenOptions::new()
+                .read(true)
+                .open(&actual_path);
+
+            let actual_file = match actual_file {
+                Ok(val) => val,
+                Err(why) => panic!("Could not open file: {}", why),
+            };
+
+            let lines = std::io::BufReader::new(actual_file).lines();
+            let mut current_avg : f32  = 0.0;
+            let mut amount : f32 = 0.0;
+            for line in lines {
+                if let Ok(ip) = line {
+                    let first_part = ip.split_whitespace()
+                        .next()
+                        .unwrap();
+                    let float : f32 = first_part.parse().unwrap();
+
+                    current_avg += float;
+                    amount += 1.0;
+                }
+            }
+            current_avg = current_avg / amount;
+            println!("{}", current_avg);
         }
-
-        let actual_path = path.as_path();
-        let actual_file = OpenOptions::new()
-            .read(true)
-            .open(&actual_path);
-
-
-
     }
+
 
     let avg_path = Path::new("avg.txt");
     let avg_file = OpenOptions::new()
@@ -215,11 +233,11 @@ fn main() -> Result<(), reqwest::Error> {
         .arg(Arg::with_name("path")
             .short("p")
             .long("path")
-            .help("Set directoy for data saving")
+            .help("Set directory for data saving")
             .default_value(""))
         .subcommand(SubCommand::with_name("scrap")
             .about("scrap current prices"))
-        .subcommand(SubCommand::with_name("recalulate-avg")
+        .subcommand(SubCommand::with_name("recalculate-avg")
             .about("recalculate averages"))
         .subcommand(SubCommand::with_name("serve")
             .about("produces png plots for all data and serves them via a webserver"))
@@ -229,10 +247,10 @@ fn main() -> Result<(), reqwest::Error> {
     println!("{}", path);
     if let Some(matches) = matches.subcommand_matches("scrap") {
         scrap_today_data(path);
-    }
-
-    if let Some(matches) = matches.subcommand_matches("recalculate-avg") {
+    } else if let Some(matches) = matches.subcommand_matches("recalculate-avg") {
        recalculate_avg();
+    } else {
+        scrap_today_data("./");
     }
 
     Ok(())
