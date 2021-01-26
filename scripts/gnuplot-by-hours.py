@@ -8,7 +8,6 @@ for i in range(24):
     value_dict[i] = 0.0
     amount_dict[i] = 0.0
 
-
 for line in readfile.readlines():
     hour = line.split("T")[1].split(":")[0]
     value = line.split(" ")[1]
